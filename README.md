@@ -8,10 +8,9 @@ In addition to the base operating system, and with the "Universe" and
 "Multiverse" repositories enabled, it has the additional following software:
 
 * [Supervisor 3.0b2-1](http://supervisord.org)
-    * Easily bring any process to foreground
-    * Start/Restart processes automatically
-    * Use supervisorctl as default "interface" to our Spoke container so that
-      using `docker attach` now works the way you always felt it should.
+    * Easily create a foreground process to keep your container alive.
+    * Start/Restart processes automatically (as dictated in each programs '.ini'
+      file.
     * Redirect STDOUT and manage logs accordingly
 
 This image is not meant to be run by itself but is instead intended as a base
