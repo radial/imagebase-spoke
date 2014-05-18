@@ -24,8 +24,14 @@ ENTRYPOINT      /bin/false
 # is set on your configuration files. In order to change it, you can set 'ENV
 # USER' and 'ENV GROUP' at anypoint in your Spoke container Dockerfile and make
 # sure to add that user and group to the system with:
+#
 # `RUN groupadd $GROUP`
-# `RUN useradd --system -G $GROUP $USER`
+# `RUN useradd --system -g $GROUP $USER`
+#
+# or add an existing user to $GROUP with:
+#
+# `RUN usermod -a -G $GROUP $USER`
+#
 # or something similar. To actually run your application as this user however,
 # you must declare such in your Supervisor .ini file for this program located
 # in '/config/supervisor/conf.d'. Supervisor itself will be run as root
