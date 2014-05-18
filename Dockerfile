@@ -11,7 +11,7 @@ MAINTAINER      Brian Clements <radial@brianclements.net>
 
 # Install packages
 ENV             DEBIAN_FRONTEND noninteractive
-RUN             apt-get -q update && apt-get -qqyV install \
+RUN             apt-get -q update && apt-get -qyV install \
                     supervisor &&\
                 apt-get clean
 RUN             env --unset=DEBIAN_FRONTEND
