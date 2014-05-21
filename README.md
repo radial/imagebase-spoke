@@ -12,6 +12,16 @@ In addition to the base operating system, and with the "Universe" and
     * Start/Restart processes automatically (as dictated in each programs '.ini'
       file.
     * Redirect STDOUT and manage logs accordingly
+* OpenSSH-server (1:6.6p1-2ubuntu2)
+    * By default, root login is disabled for anything other then public-key
+    * Set your GitHub username with `ENV GH_USER` in your Spoke Dockerfile to
+      automatically insert your public keys from GitHub into your container
+      using `ssh-import-id` if you want to be able to SSH into your container.
+    * **NOTE:** This is "secure" in that use of public keys are always secure,
+      but it is not the wisest strategy to use the same key-pair for multiple
+      venues (server cluster, public website, etc.). More robust key management
+      is a feature for a future date. For now, this suffices for protypting and
+      development on small clusters.
 
 This image is not meant to be run by itself but is instead intended as a base
 image with which your Spoke containers are started `FROM`. Supervisor is
