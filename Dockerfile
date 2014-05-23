@@ -6,7 +6,7 @@
 # therein. Installation is done here to allow for the Spoke container to be only
 # focused on the application code.
 
-FROM            radial/distro
+FROM            radial/distro:us-west-1
 MAINTAINER      Brian Clements <radial@brianclements.net>
 
 # Install packages
