@@ -62,6 +62,8 @@ ONBUILD RUN     mkdir -p /var/run/sshd
 # 4) Create a unique folder for all our logs based on our container name
 # 5) Start the supervisor daemon
 ONBUILD ENTRYPOINT \
+                rm /etc/ssh/ssh_host_* &&\
+                dpkg-reconfigure openssh-server &&\
                 ssh-import-id --output /root/.ssh/authorized_keys gh:$GH_USER; \
                 chown -R $USER:$GROUP /config /data /log &&\
                 chown -R root:root /config/supervisor &&\
