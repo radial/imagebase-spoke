@@ -42,6 +42,10 @@ ONBUILD ENV     CHOWN_USER root
 ONBUILD ENV     CHOWN_GROUP root
 
 # SSH
+# Replace the default host keys with a new set on every build.
+ONBUILD RUN     rm /etc/ssh/ssh_host_* &&\
+                dpkg-reconfigure openssh-server
+
 # To enable SSH into this container, supply your GitHub username for $GH_USER
 # with `ENV GH_USER` in your Spoke Dockerfile and the same public keys used for
 # GitHub will be inserted into your container. This is 'secure' in that use of
@@ -63,8 +67,6 @@ ONBUILD RUN     mkdir -p /var/run/sshd
 # 4) Create a unique folder for all our logs based on our container name
 # 5) Start the supervisor daemon
 ONBUILD ENTRYPOINT \
-                rm /etc/ssh/ssh_host_* &&\
-                dpkg-reconfigure openssh-server &&\
                 ssh-import-id --output /root/.ssh/authorized_keys gh:$GH_USER; \
                 chown -R $CHOWN_USER:$CHOWN_GROUP /config /data /log &&\
                 chown -R root:root /config/supervisor &&\
