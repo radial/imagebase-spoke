@@ -9,12 +9,15 @@
 FROM            radial/distro:us-west-1
 MAINTAINER      Brian Clements <radial@brianclements.net>
 
-# Install packages
+# Update system (usually very small), install default packages
 ENV             DEBIAN_FRONTEND noninteractive
-RUN             apt-get -q update && apt-get -qyV install \
+RUN             apt-get -q update &&\
+                apt-get -qyV upgrade &&\
+                apt-get -qyV install \
                     openssh-server \
                     supervisor &&\
-                apt-get clean
+                apt-get clean &&\
+                rm -rf /var/lib/apt/lists/*
 RUN             env --unset=DEBIAN_FRONTEND
 
 # SSH login fix. Otherwise user is kicked off after login
@@ -22,6 +25,14 @@ RUN             sed 's@session\s*required\s*pam_loginuid.so@session optional pam
 
 # Not meant for running by itself.
 ENTRYPOINT      /bin/false
+
+# Update System again before actual build
+ONBUILD ENV     DEBIAN_FRONTEND noninteractive
+ONBUILD RUN     apt-get -q update &&\
+                apt-get -qyV upgrade &&\
+                apt-get clean &&\
+                rm -rf /var/lib/apt/lists/*
+ONBUILD RUN     env --unset=DEBIAN_FRONTEND
 
 # The only mandatory ENVs in your Spoke Dockerfile are $CHOWN_USER and
 # $CHOWN_GROUP, and they are set to root by default. This will make sure
