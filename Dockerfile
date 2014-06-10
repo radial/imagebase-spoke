@@ -82,8 +82,7 @@ ONBUILD RUN     mkdir -p /var/run/sshd
 # 5) Start the supervisor daemon
 ONBUILD ENTRYPOINT \
                 ssh-import-id --output /root/.ssh/authorized_keys gh:$GH_USER; \
-                chown -R $CHOWN_USER:$CHOWN_GROUP /config /data /log &&\
-                chown -R root:root /config/supervisor &&\
+                chown -R $CHOWN_USER:$CHOWN_GROUP /data &&\
                 mkdir -p /log/$HOSTNAME &&\
                 supervisord \
                     --configuration=/config/supervisor/supervisord.conf \
