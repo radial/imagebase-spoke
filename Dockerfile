@@ -23,6 +23,14 @@ RUN             env --unset=DEBIAN_FRONTEND
 # SSH login fix. Otherwise user is kicked off after login
 RUN             sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
+# Create unique Spoke run directory. /var/run and /run are shared as volumes 
+# for inter-spoke communication via sockets.
+RUN             mkdir -m 777 /var/local/run &&\
+                chown root:root /var/local/run
+
+# Add our universal Spoke ENTRYPOINT
+COPY            /spoke-entrypoint.sh /spoke-entrypoint.sh
+
 # Not meant for running by itself.
 ENTRYPOINT      /bin/false
 
@@ -34,26 +42,16 @@ ONBUILD RUN     apt-get -q update &&\
                 rm -rf /var/lib/apt/lists/*
 ONBUILD RUN     env --unset=DEBIAN_FRONTEND
 
-# The only mandatory ENVs in your Spoke Dockerfile are $CHOWN_USER and
-# $CHOWN_GROUP, and they are set to root by default. This will make sure
-# $CHOWN_USER:$CHOWN_GROUP ownership is set on your configuration files. In
-# order to change it, you can set 'ENV USER' and 'ENV GROUP' at any point in
-# your Spoke container Dockerfile and make sure to add that user and group to
-# the system with:
-#
-# `RUN groupadd $CHOWN_GROUP`
-# `RUN useradd --system -g $CHOWN_GROUP $CHOWN_USER`
-#
-# or add an existing user to $CHOWN_GROUP with:
-#
-# `RUN usermod -a -G $CHOWN_GROUP $CHOWN_USER`
-#
-# or something similar. To actually run your application as this user however,
-# you must declare such in your Supervisor .ini file for this program located
-# in '/config/supervisor/conf.d'. Supervisor itself will be run as root
-# regardless.
-ONBUILD ENV     CHOWN_USER root
-ONBUILD ENV     CHOWN_GROUP root
+# By default, the contents of '/data' is owned by root (set in the
+# radial/hub-base Dockerfile) with 755 folder permissions. If this folder, or
+# any of it's subfolders, need to have different permissions or ownership, it
+# must be done in the entrypoint.sh script for that spokes application (the one
+# started in the Supervisor .ini file). Since '/data' is a volume container,
+# this cannot be done in any of the Dockerfiles themselves. Remember to
+# actually run your application as the appropriate user. You can set this
+# information in your Supervisor .ini file for this program located in
+# '/config/supervisor/conf.d'.
+# Supervisor itself will be run as root regardless.
 
 # SSH
 # Replace the default host keys with a new set on every build.
@@ -74,16 +72,10 @@ ONBUILD RUN     rm /etc/ssh/ssh_host_* &&\
 ONBUILD ENV     GH_USER /__NULL__/
 ONBUILD RUN     mkdir -p /var/run/sshd
 
-# On the resulting Spoke container, we must:
+# On the resulting Spoke container, this ENTRYPOINT script will:
 # 1) Try to grab SSH public keys from GitHub if $GH_USER is set
-# 2) Ensure $CHOWN_USER ownership for everything first
-# 3) Ensure root ownership for supervisor configuration files
-# 4) Create a unique folder for all our logs based on our container name
-# 5) Start the supervisor daemon
-ONBUILD ENTRYPOINT \
-                ssh-import-id --output /root/.ssh/authorized_keys gh:$GH_USER; \
-                chown -R $CHOWN_USER:$CHOWN_GROUP /data &&\
-                mkdir -p /log/$HOSTNAME &&\
-                supervisord \
-                    --configuration=/config/supervisor/supervisord.conf \
-                    --logfile=/log/$HOSTNAME/supervisord.log
+# 2) Create a unique folder for all our logs based on our container name
+# 3) Start the supervisor daemon
+# 4) Start this Spoke's main app group and
+# 5) Show the combined output of the app and Supervisor
+ONBUILD ENTRYPOINT ["/spoke-entrypoint.sh"]
