@@ -6,6 +6,13 @@ if [ -z $SPOKE_NAME ]; then
     exit 1
 fi
 
+# Wait until the Hub container is done loading all configuration.
+echo "Spoke \"$SPOKE_NAME\" is waiting for Hub container to load..."
+while [ -d /run/hub.lock ]; do
+    sleep 1s
+done
+echo "Hub container loaded. Continuing to load Spoke \"$SPOKE_NAME\"."
+
 if [ ! -e /tmp/first_run ]; then
     touch /tmp/first_run
 
