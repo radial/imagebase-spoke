@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+APP_GROUP="$SPOKE_NAME-group"
+
 if [ -z $SPOKE_NAME ]; then
     echo "Error: SPOKE_NAME variable not set in Dockerfile. Supervisor doesn't know what to start."
     exit 1
@@ -35,7 +37,6 @@ if [ ! $GH_USER = "/__NULL__/" ]; then
                 supervisorctl -s unix:///var/local/run/supervisor.sock start sshd" &
 fi
 
-APP_GROUP="$SPOKE_NAME-group"
 
 # Start this spoke's program group
     /bin/sh -c "while [ ! -e /var/local/run/supervisord.pid ]; do sleep 1s; done &&
