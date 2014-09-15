@@ -37,7 +37,6 @@ if [ ! $GH_USER = "/__NULL__/" ]; then
                 supervisorctl -s unix:///var/local/run/supervisor.sock start sshd" &
 fi
 
-
 # Start this spoke's program group
     /bin/sh -c "while [ ! -e /var/local/run/supervisord.pid ]; do sleep 1s; done &&
                 supervisorctl -s unix:///var/local/run/supervisor.sock start $APP_GROUP:*" &
@@ -45,7 +44,7 @@ fi
 # Copy errors to main log for easy debugging with `docker logs` if errors occur
 # preventing application startup. No need to include normal output here
 # because a real log management solution should be in place for that.
-/bin/sh -c "while [ "$(ls -A /log/$HOSTNAME)" = "" ]; do sleep 1s; done &&
+/bin/sh -c "while [ ! -e /log/$HOSTNAME/${SPOKE_NAME}_stderr.log ]; do sleep 1s; done &&
             tail --follow=name -c +0 /log/$HOSTNAME/*_stderr.log |
             tee -a /log/$HOSTNAME/supervisord.log" &
 
