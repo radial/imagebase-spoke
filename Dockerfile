@@ -23,11 +23,6 @@ RUN             env --unset=DEBIAN_FRONTEND
 # SSH login fix. Otherwise user is kicked off after login
 RUN             sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
-# Create unique Spoke run directory. /var/run and /run are shared as volumes 
-# for inter-spoke communication via sockets.
-RUN             mkdir -m 777 /var/local/run &&\
-                chown root:root /var/local/run
-
 # Add our universal Spoke ENTRYPOINT
 COPY            /spoke-entrypoint.sh /spoke-entrypoint.sh
 

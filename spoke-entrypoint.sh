@@ -25,6 +25,19 @@ if [ ! -e /tmp/first_run ]; then
 
     # Make unique directory for logs
     mkdir -p /log/$HOSTNAME
+
+    # Make unique directory for Supervisor runtime files
+    mkdir -p /run/supervisor/$HOSTNAME
+
+    # To easily see which program the Supervisor runtime files belong to.
+    touch /run/supervisor/$HOSTNAME/$SPOKE_NAME
+
+    # Here we trick Supervisor into storing it's socket and pid files in a
+    # dynamic directory.  The supervisor.conf file doesn't allow use of
+    # %(host_node_name)s when defining a pid or socketfile. But we want that,
+    # so we use $(here)s which uses the location of the configuration file
+    # itself.
+    ln -s /config/supervisor/supervisord.conf /run/supervisor/$HOSTNAME/supervisord.conf
 fi
 
 # The following programs need to be run after supervisor starts, however,
@@ -33,13 +46,13 @@ fi
 
 # Start SSHD if GH_USER is set.
 if [ ! $GH_USER = "/__NULL__/" ]; then
-    /bin/sh -c "while [ ! -e /var/local/run/supervisord.pid ]; do sleep 1s; done &&
-                supervisorctl -s unix:///var/local/run/supervisor.sock start sshd" &
+    /bin/sh -c "while [ ! -e /run/supervisor/$HOSTNAME/supervisord.pid ]; do sleep 1s; done &&
+                supervisorctl -s unix:///run/supervisor/$HOSTNAME/supervisor.sock start sshd" &
 fi
 
 # Start this spoke's program group
-    /bin/sh -c "while [ ! -e /var/local/run/supervisord.pid ]; do sleep 1s; done &&
-                supervisorctl -s unix:///var/local/run/supervisor.sock start $APP_GROUP:*" &
+/bin/sh -c "while [ ! -e /run/supervisor/$HOSTNAME/supervisord.pid ]; do sleep 1s; done &&
+    supervisorctl -s unix:///run/supervisor/$HOSTNAME/supervisor.sock start $APP_GROUP:*" &
 
 # Copy errors to main log for easy debugging with `docker logs` if errors occur
 # preventing application startup. No need to include normal output here
@@ -49,5 +62,5 @@ fi
             tee -a /log/$HOSTNAME/supervisord.log" &
 
 exec supervisord \
-    --configuration=/config/supervisor/supervisord.conf \
+    --configuration=/run/supervisor/$HOSTNAME/supervisord.conf \
     --logfile=/log/$HOSTNAME/supervisord.log
