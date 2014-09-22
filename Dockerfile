@@ -9,6 +9,10 @@
 FROM            radial/distro:us-west-1
 MAINTAINER      Brian Clements <radial@brianclements.net>
 
+# Keep upstart from throwing errors
+RUN             dpkg-divert --local --rename --add /sbin/initctl &&\
+                ln -sf /bin/true /sbin/initctl
+
 # Update system (usually very small), install default packages
 ENV             DEBIAN_FRONTEND noninteractive
 RUN             apt-get -q update &&\
