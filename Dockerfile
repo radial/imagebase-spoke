@@ -22,7 +22,6 @@ RUN             apt-get -q update &&\
                     supervisor &&\
                 apt-get clean &&\
                 rm -rf /var/lib/apt/lists/*
-RUN             env --unset=DEBIAN_FRONTEND
 
 # SSH login fix. Otherwise user is kicked off after login
 RUN             sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
@@ -39,7 +38,6 @@ ONBUILD RUN     apt-get -q update &&\
                 apt-get -qyV upgrade &&\
                 apt-get clean &&\
                 rm -rf /var/lib/apt/lists/*
-ONBUILD RUN     env --unset=DEBIAN_FRONTEND
 
 # By default, the contents of '/data' is owned by root (set in the
 # radial/hub-base Dockerfile) with 755 folder permissions. If this folder, or
