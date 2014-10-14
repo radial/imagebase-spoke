@@ -37,7 +37,7 @@ if [ ! -e /tmp/first_run ]; then
     # %(host_node_name)s when defining a pid or socketfile. But we want that,
     # so we use $(here)s which uses the location of the configuration file
     # itself.
-    ln -s /config/supervisor/supervisord.conf /run/supervisor/$HOSTNAME/supervisord.conf
+    ln -sf /config/supervisor/supervisord.conf /run/supervisor/$HOSTNAME/supervisord.conf
 fi
 
 # The following programs need to be run after supervisor starts, however,
