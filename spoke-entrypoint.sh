@@ -8,6 +8,11 @@ if [ -z $SPOKE_NAME ]; then
     exit 1
 fi
 
+if [ ! -d /config ]; then
+    echo "Error: No Hub container detected."
+    exit 1
+fi
+
 # Wait until the Hub container is done loading all configuration.
 echo "Spoke \"$SPOKE_NAME\" is waiting for Hub container to load..."
 while [ -d /run/hub.lock ]; do
