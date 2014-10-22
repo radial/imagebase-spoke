@@ -31,3 +31,13 @@ Dockerfile are for the application itself; not the topology management.
 Any Spoke container run from this base needs to have certain design principals.
 Check out the documentation [here](https://github.com/radial/docs) for more
 details.
+
+## Tunables
+
+Tunable environment variables; modify at runtime.
+
+  - **SPOKE_DETACH_MODE**: Bypass hub/wheel checks and run Spoke anyway. Useful
+    for debugging and in cases of extreme need for portability for the Spoke
+    container, or, if it truly is a stand-alone container without any need for
+    configuration via the typical hub method of configuration management. Your
+    Spoke needs to specifically be created for such a purpose.

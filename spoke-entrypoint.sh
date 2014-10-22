@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Tunable variables
+SPOKE_DETACH_MODE=${SPOKE_DETACH_MODE:-"False"}
+
 APP_GROUP="$SPOKE_NAME-group"
 
 if [ -z $SPOKE_NAME ]; then
@@ -8,7 +11,7 @@ if [ -z $SPOKE_NAME ]; then
     exit 1
 fi
 
-if [ ! -d /config ]; then
+if [ "$SPOKE_DETACH_MODE" = "False" ] && [ ! -d /config ]; then
     echo "Error: No Hub container detected."
     exit 1
 fi
