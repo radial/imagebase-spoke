@@ -10,7 +10,7 @@ SUPERVISOR_REPO=${SUPERVISOR_REPO:-"https://github.com/radial/config-supervisor.
 SUPERVISOR_BRANCH=${SUPERVISOR_BRANCH:-"master"}
 WHEEL_REPO=${WHEEL_REPO:-""}
 WHEEL_BRANCH=${WHEEL_BRANCH:-"config"}
-SPOKE_CMD={$SPOKE_CMD:-""}
+SPOKE_CMD=${SPOKE_CMD:-""}
 
 # Misc settings 
 APP_GROUP="$SPOKE_NAME-group"
@@ -81,11 +81,14 @@ do_first_run_tasks() {
     # Setup configuration in spoke-detach mode only
     if [ "$SPOKE_DETACH_MODE" = "True" ]; then
         # Clone supervisor skeleton
+        echo "cloning Supervisor skeleton config..."
         git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&
-            echo "...successfully cloned Supervisor skeleton config."
+            echo "...done"
         mkdir -p /data /log
         cd /config
-        pull_wheel_config
+        if [ "$WHEEL_REPO" != "" ]; then
+            pull_wheel_config
+        fi
         apply_permissions 
     fi
 
@@ -138,8 +141,7 @@ start_normal() {
         --logfile=/log/$HOSTNAME/supervisord.log
 }
 
-
-if [ $# -le 1 ]; then
+if [ $# -eq 0 ]; then
     if [ ! -e /tmp/first_run ]; then
         touch /tmp/first_run
 
