@@ -51,7 +51,6 @@ run_spoke_checks() {
         echo "Error: SPOKE_NAME variable not set in Dockerfile. Supervisor doesn't know what to start."
         exit 1
     fi
-
     if [ "$SPOKE_DETACH_MODE" = "False" ]; then
         if [ ! -d /config ]; then
             echo "Error: No Hub container detected."
@@ -64,12 +63,9 @@ run_spoke_checks() {
             sleep 1s
         done
         echo "Hub container loaded. Continuing to load Spoke \"$SPOKE_NAME\"."
-    fi
-}
-
-do_first_run_tasks() {
-    # Setup configuration in spoke-detach mode only
-    if [ "$SPOKE_DETACH_MODE" = "True" ]; then
+    elif [ "$WHEEL_REPO" = "" ]; then
+            echo "Warning: \"Spoke-detach\" mode is enabled, but the \`\$WHEEL_REPO\` variable is not set. This Spoke will not pull any configuration."
+    else
         if [ ! $(which git) ]; then
             echo "git is required for \"Spoke-detach\" mode. Please install it in your Spoke Dockerfile."
             exit 1
@@ -78,11 +74,12 @@ do_first_run_tasks() {
             echo "\"Spoke-detach\" mode cannot run with \`--volumes-from\` any hub containers."
             exit 1
         fi
-        if [ "$WHEEL_REPO" = "" ]; then
-            echo "The \`\$WHEEL_REPO\` variable must be set in \"Spoke-detach\" mode and used to pull configuration."
-            exit 1
-        fi
-                
+    fi
+}
+
+do_first_run_tasks() {
+    # Setup configuration in spoke-detach mode only
+    if [ "$SPOKE_DETACH_MODE" = "True" ]; then
         # Clone supervisor skeleton
         git clone $SUPERVISOR_REPO -b $SUPERVISOR_BRANCH /config &&
             echo "...successfully cloned Supervisor skeleton config."
@@ -143,16 +140,19 @@ start_normal() {
 
 
 if [ $# -le 1 ]; then
-
     if [ ! -e /tmp/first_run ]; then
         touch /tmp/first_run
 
-    do_first_run_tasks
+        run_spoke_checks
+        do_first_run_tasks
     fi
 
     start_normal
+
 elif [ "$SPOKE_CMD" != "" ]; then
     /bin/sh -c "exec ${SPOKE_CMD} $@"
+
 else
     /bin/sh -c "exec $@"
+
 fi
