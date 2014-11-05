@@ -10,6 +10,7 @@ SUPERVISOR_REPO=${SUPERVISOR_REPO:-"https://github.com/radial/config-supervisor.
 SUPERVISOR_BRANCH=${SUPERVISOR_BRANCH:-"master"}
 WHEEL_REPO=${WHEEL_REPO:-""}
 WHEEL_BRANCH=${WHEEL_BRANCH:-"config"}
+SPOKE_CMD={$SPOKE_CMD:-""}
 
 # Misc settings 
 APP_GROUP="$SPOKE_NAME-group"
@@ -141,11 +142,17 @@ start_normal() {
 }
 
 
-run_spoke_checks
+if [ $# -le 1 ]; then
 
-if [ ! -e /tmp/first_run ]; then
-    touch /tmp/first_run
+    if [ ! -e /tmp/first_run ]; then
+        touch /tmp/first_run
+
     do_first_run_tasks
-fi
+    fi
 
-start_normal
+    start_normal
+elif [ "$SPOKE_CMD" != "" ]; then
+    /bin/sh -c "exec ${SPOKE_CMD} $@"
+else
+    /bin/sh -c "exec $@"
+fi
