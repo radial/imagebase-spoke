@@ -34,10 +34,23 @@ details.
 
 ## Tunables
 
-Tunable environment variables; modify at runtime.
+Tunable environment variables; modify at runtime. Italics are defaults.
 
+  - **$SPOKE_CMD**: [_nothing_] Allows user to set a command (usually in the
+    dockerfile) that can enable the resulting Spoke container to take arguments
+    to the `docker run -it some/image` command. When this is set, and arguments
+    are present, this value will behave like the ENTRYPOINT directive in the
+    dockerfile and any arguments will be passed to it. Regardless of being set
+    or not, however, if no arguments are given, the Spoke container will start
+    Supervisord normally along with all the checks that go along with it.
   - **$SPOKE_DETACH_MODE**: [True|_False_] Bypass hub/wheel checks and run Spoke
     anyway. Useful for debugging and in cases of extreme need for portability
     for the Spoke container, or, if it truly is a stand-alone container without
     any need for configuration via the typical hub method of configuration
     management. Your Spoke needs to specifically be created for such a purpose.
+    - For **SPOKE_DETACH_MODE** only:
+        - **$SUPERVISOR_REPO**:
+        [_"https://github.com/radial/config-supervisor.git"_] 
+        - **$SUPERVISOR_BRANCH**: [_"master"_]
+        - **$WHEEL_REPO**: [_nothing_]
+        - **$WHEEL_BRANCH**: [_"config"_]
