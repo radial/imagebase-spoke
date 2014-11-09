@@ -152,9 +152,7 @@ if [ $# -eq 0 ]; then
     start_normal
 
 elif [ "$SPOKE_CMD" != "" ]; then
-    /bin/sh -c "exec ${SPOKE_CMD} $@"
-
+    /bin/sh -c "exec ${SPOKE_CMD} $(echo "$@")"
 else
-    /bin/sh -c "exec $@"
-
+    /bin/sh -c "exec $(echo "$@")"
 fi
