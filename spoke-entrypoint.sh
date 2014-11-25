@@ -92,11 +92,6 @@ do_first_run_tasks() {
         apply_permissions 
     fi
 
-    # Import public keys from github
-    if [ ! $GH_USER = "/__NULL__/" ]; then
-        ssh-import-id --output /root/.ssh/authorized_keys gh:$GH_USER
-    fi
-
     # Make unique directory for logs
     mkdir -p /log/$HOSTNAME
 
@@ -118,12 +113,6 @@ start_normal() {
     # The following programs need to be run after supervisor starts, however,
     # we need to run supervisor last because of `exec` in this script. So we run
     # them with a delay until after supervisor claims PID 1 through exec.
-
-    # Start SSHD if GH_USER is set.
-    if [ ! $GH_USER = "/__NULL__/" ]; then
-        /bin/sh -c "while [ ! -e /run/supervisor/$HOSTNAME/supervisord.pid ]; do sleep 1s; done &&
-                    supervisorctl -s unix:///run/supervisor/$HOSTNAME/supervisor.sock start sshd" &
-    fi
 
     # Start this spoke's program group
     /bin/sh -c "while [ ! -e /run/supervisor/$HOSTNAME/supervisord.pid ]; do sleep 1s; done &&

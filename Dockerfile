@@ -18,13 +18,9 @@ ENV             DEBIAN_FRONTEND noninteractive
 RUN             apt-get -q update &&\
                 apt-get -qyV upgrade &&\
                 apt-get -qyV install \
-                    openssh-server \
                     supervisor &&\
                 apt-get clean &&\
                 rm -rf /var/lib/apt/lists/*
-
-# SSH login fix. Otherwise user is kicked off after login
-RUN             sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
 # Add our universal Spoke ENTRYPOINT
 COPY            /spoke-entrypoint.sh /spoke-entrypoint.sh
@@ -50,29 +46,9 @@ ONBUILD RUN     apt-get -q update &&\
 # '/config/supervisor/conf.d'.
 # Supervisor itself will be run as root regardless.
 
-# SSH
-# Replace the default host keys with a new set on every build.
-ONBUILD RUN     rm /etc/ssh/ssh_host_* &&\
-                dpkg-reconfigure openssh-server
-
-# To enable SSH into this container, supply your GitHub username for $GH_USER
-# with `ENV GH_USER` in your Spoke Dockerfile and the same public keys used for
-# GitHub will be inserted into your container. This is 'secure' in that use of
-# public keys are always secure, but it is not the wisest strategy to use the
-# same key-pair for multiple venues (server cluster, public website, etc.). More
-# robust key management is a feature for a future date. For now, this suffices
-# for prototyping and development on small clusters.
-#
-# For the security minded, the default '/__NULL__/' value fails the syntax test
-# in `ssh-import-id` and never reaches the github API. This is safer then
-# sending an "unlikely" value to the API and hoping it doesn't match anything.
-ONBUILD ENV     GH_USER /__NULL__/
-ONBUILD RUN     mkdir -p /var/run/sshd
-
 # On the resulting Spoke container, this ENTRYPOINT script will:
-# 1) Try to grab SSH public keys from GitHub if $GH_USER is set
-# 2) Create a unique folder for all our logs based on our container name
-# 3) Start the supervisor daemon
-# 4) Start this Spoke's main app group and
-# 5) Show the combined output of the app and Supervisor
+# 1) Create a unique folder for all our logs based on our container name
+# 2) Start the supervisor daemon
+# 3) Start this Spoke's main app group and
+# 4) Show the combined output of the app and Supervisor
 ONBUILD ENTRYPOINT ["/spoke-entrypoint.sh"]
