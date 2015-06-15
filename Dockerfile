@@ -17,8 +17,8 @@ RUN             apt-get -q update &&\
                 apt-get clean &&\
                 rm -rf /var/lib/apt/lists/*
 
-# Add our universal Spoke ENTRYPOINT
-COPY            /spoke-entrypoint.sh /spoke-entrypoint.sh
+# Add our universal Spoke init script
+COPY            /SPOKE /SPOKE
 
 # Not meant for running by itself.
 ENTRYPOINT      /bin/false
@@ -41,4 +41,4 @@ ONBUILD RUN     apt-get -q update &&\
 # On the resulting Spoke container, this init script will take care of
 # launching our Spokes "entrypoint.sh" script, passing it signals, and sending
 # std{out|err} to either log files, the docker daemon, or both.
-ONBUILD ENTRYPOINT ["/spoke-entrypoint.sh"]
+ONBUILD ENTRYPOINT ["/SPOKE"]
