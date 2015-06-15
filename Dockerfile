@@ -1,10 +1,7 @@
 # Dockerfile for Spoke-Base
-# 
-# This Spoke-Base Dockerfile adds a required package for Spoke container
-# management in the Radial topology. Supervisor is used as the main interface
-# for `docker attach` as well as for managing the running process contained
-# therein. Installation is done here to allow for the Spoke container to be only
-# focused on the application code.
+
+# Updates are done here to allow for the Spoke container to be only focused on
+# the application code.
 
 FROM            radial/distro:us-west-1
 MAINTAINER      Brian Clements <radial@brianclements.net>
@@ -17,8 +14,6 @@ RUN             dpkg-divert --local --rename --add /sbin/initctl &&\
 ENV             DEBIAN_FRONTEND noninteractive
 RUN             apt-get -q update &&\
                 apt-get -qyV upgrade &&\
-                apt-get -qyV install \
-                    supervisor &&\
                 apt-get clean &&\
                 rm -rf /var/lib/apt/lists/*
 
@@ -38,17 +33,12 @@ ONBUILD RUN     apt-get -q update &&\
 # By default, the contents of '/data' is owned by root (set in the
 # radial/hub-base Dockerfile) with 755 folder permissions. If this folder, or
 # any of it's subfolders, need to have different permissions or ownership, it
-# must be done in the entrypoint.sh script for that spokes application (the one
-# started in the Supervisor .ini file). Since '/data' is a volume container,
-# this cannot be done in any of the Dockerfiles themselves. Remember to
-# actually run your application as the appropriate user. You can set this
-# information in your Supervisor .ini file for this program located in
-# '/config/supervisor/conf.d'.
-# Supervisor itself will be run as root regardless.
+# must be done in the entrypoint.sh script for that spokes application. Since
+# '/data' is a volume container, this cannot be done in any of the Dockerfiles
+# themselves. Remember to actually run your application as the appropriate
+# user. 
 
-# On the resulting Spoke container, this ENTRYPOINT script will:
-# 1) Create a unique folder for all our logs based on our container name
-# 2) Start the supervisor daemon
-# 3) Start this Spoke's main app group and
-# 4) Show the combined output of the app and Supervisor
+# On the resulting Spoke container, this init script will take care of
+# launching our Spokes "entrypoint.sh" script, passing it signals, and sending
+# std{out|err} to either log files, the docker daemon, or both.
 ONBUILD ENTRYPOINT ["/spoke-entrypoint.sh"]
