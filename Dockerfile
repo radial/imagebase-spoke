@@ -20,8 +20,8 @@ RUN             apt-get -q update &&\
 # Add our universal Spoke init script
 COPY            /SPOKE /SPOKE
 
-# Not meant for running by itself.
-ENTRYPOINT      /bin/false
+# Default entrypoint
+ENTRYPOINT      /bin/bash
 
 # Update System again before actual build
 ONBUILD ENV     DEBIAN_FRONTEND noninteractive
